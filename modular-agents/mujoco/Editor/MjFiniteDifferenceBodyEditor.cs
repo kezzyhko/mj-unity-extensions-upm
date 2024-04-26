@@ -27,6 +27,8 @@ public class MjFiniteDifferenceBodyEditor : Editor
 
     protected virtual void OnSceneGUI()
     {
+        _hingejoints = _hingejoints.Where(x => x != null).ToArray();
+
         foreach(var x in _hingejoints)
             DrawHandles(x);
 
