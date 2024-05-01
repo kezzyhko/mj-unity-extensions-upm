@@ -252,6 +252,24 @@ namespace Mujoco.Extensions
             return -Vector3.Cross(globalComPositionVector, angularVelocity) + frameVelocity;
         }
 
+        public static unsafe Vector3 LocalVelocity(this MjBody body, MujocoLib.mjtObj objType = MujocoLib.mjtObj.mjOBJ_BODY)
+        {
+            MujocoLib.mjModel_* Model = mjScene.Model;
+            MujocoLib.mjData_* Data = mjScene.Data;
+            Vector3 bodyVel = Vector3.one;
+            double[] mjBodyVel = new double[6];
+            fixed (double* res = mjBodyVel)
+            {
+                MujocoLib.mj_objectVelocity(
+                      Model, Data, (int)objType, body.MujocoId, res, 1);
+                // linear velocity is in the last 3 entries
+                bodyVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 1));
+
+            }
+            return bodyVel;
+
+        }
+
         /// <summary>
         /// Get the linear velocityof a body in cartesian space.
         /// </summary>
@@ -277,6 +295,8 @@ namespace Mujoco.Extensions
             }
             return bodyVel;
         }
+
+     
 
         public static IEnumerable<T> GetDepthFirstSubtreeComponents<T>(this MjBody mjBody) where T: MjComponent
         {
@@ -378,6 +398,24 @@ namespace Mujoco.Extensions
         public static unsafe Vector3 GlobalPosition(this MjBaseBody body)
         {
             return MjEngineTool.UnityVector3(mjScene.Data->xpos + body.MujocoId * 3);
+        }
+
+
+
+
+        public static unsafe Vector3 LocalAngularVelocity(this MjBody body)
+        {
+            MujocoLib.mjModel_* Model = mjScene.Model;
+            MujocoLib.mjData_* Data = mjScene.Data;
+            Vector3 bodyAngVel = Vector3.one;
+            double[] mjBodyAngVel = new double[6];
+            fixed (double* res = mjBodyAngVel)
+            {
+                MujocoLib.mj_objectVelocity(
+                    mjScene.Model, Data, (int)MujocoLib.mjtObj.mjOBJ_BODY, body.MujocoId, res, 1);
+                bodyAngVel = MjEngineTool.UnityVector3(MjEngineTool.MjVector3AtEntry(res, 0));
+            }
+            return bodyAngVel;
         }
 
         public static unsafe (Vector3, double, int) MjGroundRayCast(MujocoLib.mjModel_* model, MujocoLib.mjData_* data, Ray ray, int groundGroup = 4)
