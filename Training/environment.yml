@@ -2,21 +2,22 @@ name: ml-agents
 channels:
   - pytorch
   - nvidia
-  #- defaults
+  - defaults
 dependencies:
   - pip=23.3.1
   - protobuf=3.20.3
-  - python=3.10.8 #above this it will not find mlagents
-  - pytorch=1.13.1 #to install mlagents==0.30.0 it will downgrade to torch 1.11.1
+  - python=3.9.13
+  - pytorch=1.13.1
   - pytorch-cuda=12.1
   - six=1.16.0
   - wheel=0.41.2
   - yaml=0.2.5
 
   - pip:
-      - mlagents==1.0.0 #0.30.0
-      - mlagents-envs==1.0.0 #0.30.0
+      - mlagents==0.30.0
+      - mlagents-envs==0.30.0
       - numpy==1.21.2
+      - torch==1.11.0
 
     #to run version 0.30.0 on a RTX4090,
     #once finished installing activate the environment and run: 
