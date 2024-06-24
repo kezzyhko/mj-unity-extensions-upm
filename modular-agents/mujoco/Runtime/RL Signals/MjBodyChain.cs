@@ -50,12 +50,16 @@ namespace ModularAgents.Kinematic.Mujoco
             {
                 return transform.GetComponent<MjMocapBodyKinematicsComponent>().GetIKinematic();
             }
+            else if (transform.GetComponent<MjFiniteDifferenceBody>())
+            {
+                return transform.GetComponent<MjFiniteDifferenceBody>().GetIKinematic();
+            }
             throw new NotImplementedException($"No kinematic component recognized on transform {transform.name}");
         }
 
         public static bool IsIKinematic(this Transform transform)
         {
-            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>();
+            return transform.GetComponent<ArticulationBody>() || transform.GetComponent<Rigidbody>() || transform.GetComponent<MjBody>() || transform.GetComponent<MjMocapBodyKinematicsComponent>() || transform.GetComponent<MjFiniteDifferenceBody>();
         }
     }
 
