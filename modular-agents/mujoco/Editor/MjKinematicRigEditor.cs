@@ -45,6 +45,7 @@ namespace ModularAgents.EditorScripts
             {
                 MjKinematicRig t = target as MjKinematicRig;
                 t.OnAgentInitialize();
+		EditorUtility.SetDirty(target);
             }
 
 
