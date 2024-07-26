@@ -41,6 +41,12 @@ namespace ModularAgents.EditorScripts
                 t.CreateMocapBodies();
             }
 
+            if (GUILayout.Button("Align Mocap Bodies"))
+            {
+                MjKinematicRig t = target as MjKinematicRig;
+                t.OnAgentInitialize();
+            }
+
 
 
             serializedObject.ApplyModifiedProperties();
