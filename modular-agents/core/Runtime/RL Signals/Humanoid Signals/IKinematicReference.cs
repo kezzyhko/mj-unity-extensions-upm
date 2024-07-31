@@ -29,7 +29,7 @@ public interface IKinematicReference
 
     public IReadOnlyList<Vector3> RagdollAngularVelocities { get; }
 
-    public IReadOnlyList<IKinematic> Kinematics { get;  }
+   // public IReadOnlyList<IKinematic> Kinematics { get;  }
 }
 
 
