@@ -51,7 +51,7 @@ public class MjKinematicRig : MonoBehaviour, IKinematicReference
 
     public IReadOnlyList<Vector3> RagdollAngularVelocities => throw new NotImplementedException();
 
-    //public IReadOnlyList<IKinematic> Kinematics => kinematicRagdollRoot.GetComponentsInChildren<MjBody>().Select(mjb => (IKinematic) new MjBodyAdapter(mjb)).ToList();
+    public IReadOnlyList<IKinematic> Kinematics => kinematicRagdollRoot.GetComponentsInChildren<MjBody>().Select(mjb => (IKinematic) new MjBodyAdapter(mjb)).ToList();
 
     public Transform KinematicRagdollRoot { get => kinematicRagdollRoot; }
   
