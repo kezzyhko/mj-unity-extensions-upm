@@ -269,7 +269,6 @@ namespace Mujoco.Extensions
         // would look and behave wrong.
         internal static void ScaleGeom(this MjGeom geom, Vector3 globalScalingDirection, float longitudinalScale, float orthogonalScale, GeomScalingOptions geomOptions)
         {
-            Debug.Log(geom.name);
             var alignmentTolerance = geomOptions.alignmentTolerance;
             var attemptMisalignedScale = geomOptions.attemptMisalignedScale;
             var alignments = new List<Vector3>() { geom.transform.right, geom.transform.up, geom.transform.forward }
