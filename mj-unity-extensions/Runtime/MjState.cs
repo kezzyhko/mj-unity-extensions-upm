@@ -750,7 +750,7 @@ namespace Mujoco.Extensions
 
         public static bool IsRoot(this MjBody _mb)
         {
-            return _mb.transform.parent != null ? !_mb.transform.parent.GetComponent<MjBody>() : true;
+            return _mb.transform.parent != null ? !_mb.transform.GetComponentInParent<MjBody>() : true;
         }
 
         /// <summary>

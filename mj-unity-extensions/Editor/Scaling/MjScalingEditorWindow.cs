@@ -35,6 +35,12 @@ namespace Mujoco.Extensions
         bool showReference;
 
         [SerializeField]
+        bool reorientToReference;
+
+        [SerializeField]
+        bool repositionToReference;
+
+        [SerializeField]
         bool inheritScaleForEndEffectors;
 
         [SerializeField]
@@ -229,14 +235,21 @@ namespace Mujoco.Extensions
             inheritScaleForEndEffectors = EditorGUILayout.Toggle(new GUIContent("Inherit Scale", "Reuse the parent segment's scale for segment that has no corresponding length in the reference."), inheritScaleForEndEffectors);
             EditorGUILayout.EndHorizontal();
 
-            mass = EditorGUILayout.FloatField(new GUIContent("Mass (kg)", "Leave as 0 if you want to leave the density of the geoms unaffected. Otherwise density of geoms will be set to mass/total_volume"), mass);
+            mass = EditorGUILayout.FloatField(new GUIContent("Mass (kg)", "Leave as 0 if you want to leave the density of the geoms unaffected. Otherwise density of geoms will be set to mass/total_volume."), mass);
 
             orthogonalScaleRatio = EditorGUILayout.Slider(new GUIContent("Orthogonal ratio", "Ratio of longitudinal-to-orthogonal scaling. If 0, the thickness (depth and width) of segments will not be affected. At 1, a segment twice as long will be twice as wide."), orthogonalScaleRatio, 0f, 1f);
 
             if (!mjHumanoidRoot || !mjAvatar || !referenceAvatar || !referenceRootGameObject) mecanimConnectionTransforms = null;
 
+            EditorGUILayout.BeginHorizontal();
+            repositionToReference = EditorGUILayout.Toggle(new GUIContent("Reposition segments", "Segments will be rotated so their child segments best overlap with the position of the reference."), repositionToReference);
+            EditorGUILayout.Space(20);
+            reorientToReference = EditorGUILayout.Toggle(new GUIContent("Reorient body frames", "The body frames will be reoriented to match the reference (doesn't affect the actual pose)."), reorientToReference);
+            EditorGUILayout.EndHorizontal();
+
             if (GUILayout.Button("Scale Humanoid"))
             {
+                SetUndo();
                 var startSegment = RecursiveCreateSegments(MjHierarchyTool.FindParentComponent<MjBaseBody>(mjHumanoidRoot));
                 var segments = startSegment.SubtreeSegments.Skip(1).ToList();
                 var mjMecanimNames = segments.Select(s => s.MecanimName).Distinct().ToList();
@@ -305,8 +318,54 @@ namespace Mujoco.Extensions
                         if(geom.Mass != 0) geom.Mass *= massScale;
                         else geom.Density *= massScale;
                     }
-
                 }
+
+                //Segments are the correct length, but not the correct orientation. We can now adjust for that.
+                if (repositionToReference)
+                {
+                    var originalJointOrientations = new Dictionary<int, Quaternion>(
+                        mjHumanoidRoot
+                            .GetComponentInParent<MjBaseBody>()
+                            .GetComponentsInChildren<MjBaseJoint>()
+                            .Select(j => new KeyValuePair<int, Quaternion>(j.GetInstanceID(), j.transform.rotation))
+                            .ToList()
+                    );
+
+                    foreach (var processedSegment in startSegment.SubtreeSegments.Skip(1).ToList())
+                    {
+                        
+                        if (string.IsNullOrEmpty(processedSegment.ChildMecanimName)) continue;
+                        
+                        var refBoneTransform = mecanimConnectionTransforms[(processedSegment.MecanimName, processedSegment.ChildMecanimName)];
+                        
+                        Reposition.AlignBodyPosition(processedSegment.childBody, 
+                            refBoneTransform.childGlobalPosition + mjHumanoidRoot.transform.position, 
+                            processedSegment.ParentSegment.ChildSegments.Count < 2, 
+                            originalJointOrientations);
+                    }
+                }
+
+                // Change the body frame axis to match the reference.
+                if (reorientToReference)
+                {
+                    foreach (var processedSegment in startSegment.SubtreeSegments.Skip(1).ToList())
+                    {
+
+                        if (string.IsNullOrEmpty(processedSegment.MecanimName)) continue;
+                        if (string.IsNullOrEmpty(processedSegment.ChildMecanimName)) continue;
+
+                        var refBoneTransform = mecanimConnectionTransforms[(processedSegment.MecanimName, processedSegment.ChildMecanimName)];
+
+                        Reposition.ReorientBodyFrame(processedSegment.segmentBody, refBoneTransform.GlobalRotation);
+                    }
+                }
+
+                // Ensure the transform scale of Mj components is 1:
+                foreach (MjComponent childComponent in mjHumanoidRoot.transform.parent.GetComponentsInChildren<MjComponent>())
+                {
+                    childComponent.transform.localScale = Vector3.one;
+                }
+
             }
             EditorGUI.EndDisabledGroup();
 
@@ -318,9 +377,14 @@ namespace Mujoco.Extensions
             SceneView.RepaintAll();
         }
 
+        private void SetUndo()
+        {
+            Undo.RegisterCompleteObjectUndo(mjHumanoidRoot.transform.parent.GetComponentsInChildren<Component>().ToArray(), "Scale Mj Humanoid Components");
+            Undo.RegisterCompleteObjectUndo(mjHumanoidRoot.transform.parent.GetComponentsInChildren<Transform>().ToArray(), "Scale Mj Humanoid Transforms");
+        }
 
         /// <summary>
-        /// Find the corresponding mecanim bones in the Unity avatar, and get that bone's length. If symmetrric arguement is enabled, will return the average bone length for bilateral bones.
+        /// Find the corresponding mecanim bones in the Unity avatar, and get that bone's length. If symmetric arguement is enabled, will return the average bone length for bilateral bones.
         /// </summary>
         private float CalculateDesiredSegmentLength(string startMecanimName, string endMecanimName, bool symmetric, Dictionary<(string, string), MecanimBoneTransform> positionDict)
         {
@@ -431,7 +495,7 @@ namespace Mujoco.Extensions
         /// <summary>
         /// Gives positional information about mecanim bones in an avatar with a given transform hierarchy. 
         /// Using the hierarchy (from referenceRootGameObject) directly would ignore the adjustments made to the avatar by the humanoid rigging.
-        /// This class uses the structure found in the transform hierarchy of referenceRootGameobject, with the position and roation crossreferenced from
+        /// This class uses the structure found in the transform hierarchy of referenceRootGameobject, with the position and rotation cross-referenced from
         /// the flattened list of the avatar skeleton bone collection. We could get the length only from the hierarchy, but we might as well do this
         /// for the visualization of the avatar since we have all the information for it.
         /// </summary>
