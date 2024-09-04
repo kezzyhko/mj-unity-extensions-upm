@@ -5,6 +5,8 @@ using Mujoco;
 using Mujoco.Extensions;
 using System;
 
+using ModularAgents;
+
 namespace ModularAgents.Kinematic.Mujoco
 {
     /// <summary>
