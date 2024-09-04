@@ -7,6 +7,8 @@ using System.Linq;
 using Mujoco.Extensions;
 using UnityEngine;
 
+using ModularAgents;
+
 public class MjFiniteDifferenceManager :MonoBehaviour
 {
    public
