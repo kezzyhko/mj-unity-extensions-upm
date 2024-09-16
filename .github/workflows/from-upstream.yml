@@ -16,10 +16,11 @@ jobs:
       uses: actions/checkout@v4
       with:
         persist-credentials: false
+        fetch-depth: 0
         ref: main
     - name: Sync master with upstream latest
       id: sync
-      uses: aormsby/Fork-Sync-With-Upstream-action@v2.3
+      uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
       with:
         target_repo_token: ${{ secrets.ACCESS_TOKEN }}
         upstream_repository: Balint-H/modular-agents
@@ -28,6 +29,7 @@ jobs:
         git_fetch_args: --tags
         git_pull_args: --tags
         git_push_args: --tags
+        test_mode: true
       
     - name: Show value of 'has_new_commits'
       run: echo ${{ steps.sync.outputs.has_new_commits }}
