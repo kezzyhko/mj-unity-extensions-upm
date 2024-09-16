@@ -15,6 +15,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
+        ref: main
         fetch-depth: 0
     - name: Sync master with upstream latest
       id: sync
@@ -29,6 +30,9 @@ jobs:
     - name: Show value of 'has_new_commits'
       run: |
         echo ${{ steps.sync.outputs.has_new_commits }}
+    - name: Show list of remotes
+      run: |
+        git remote
     - name: Create runs for new tags
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
