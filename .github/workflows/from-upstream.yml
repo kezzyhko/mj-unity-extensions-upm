@@ -32,6 +32,8 @@ jobs:
     - name: Show value of 'has_new_commits'
       run: echo ${{ steps.sync.outputs.has_new_commits }}
     - name: Create runs for new tags
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         UPM_TAGS="$(git tag --merged upm)"
         MAIN_TAGS="$(git tag --merged main)"
