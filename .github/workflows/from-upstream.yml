@@ -21,16 +21,23 @@ jobs:
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
       with:
-        target_repo_token: ${{ secrets.ACCESS_TOKEN }}
+        target_repo_token: ${{ secrets.GITHUB_TOKEN }}
         upstream_sync_repo: Balint-H/modular-agents
         upstream_sync_branch: main
         target_sync_branch: main
         upstream_pull_args: --tags
         target_branch_push_args: --tags
-    - name: Push # needed to run subsequent workflows
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.ACCESS_TOKEN }}
-        branch: main
+    - name: Create runs for new tags
+      run: |
+        UPM_TAGS="$(git tag --merged upm)"
+        MAIN_TAGS="$(git tag --merged main)"
+        NEW_TAGS=$(grep -Fxvf <($UPM_TAGS) <(echo "$MAIN_TAGS"))
+
+        echo "$NEW_TAGS" | while read TAG
+        do
+            gh workflow run to-upm.yml -f tagName=$TAG
+            RUN_ID=$(gh run list --json databaseId --workflow to-upm.yml --limit 1 | jq -r '.[0].databaseId') # https://stackoverflow.com/a/77825187/6702274
+            gh run watch RUN_ID --exit-status
+        done
     - name: Show value of 'has_new_commits'
       run: echo ${{ steps.sync.outputs.has_new_commits }}
