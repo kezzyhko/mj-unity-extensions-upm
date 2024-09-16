@@ -28,6 +28,5 @@ jobs:
         target_sync_branch: main
         upstream_pull_args: --tags
         target_branch_push_args: --tags
-        test_mode: true
     - name: Show value of 'has_new_commits'
       run: echo ${{ steps.sync.outputs.has_new_commits }}
