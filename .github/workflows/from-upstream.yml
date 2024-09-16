@@ -23,13 +23,11 @@ jobs:
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
       with:
         target_repo_token: ${{ secrets.ACCESS_TOKEN }}
-        upstream_repository: Balint-H/modular-agents
-        upstream_branch: main
-        target_branch: main
-        git_fetch_args: --tags
-        git_pull_args: --tags
-        git_push_args: --tags
+        upstream_sync_repo: Balint-H/modular-agents
+        upstream_sync_branch: main
+        target_sync_branch: main
+        upstream_pull_args: --tags
+        target_branch_push_args: --tags
         test_mode: true
-      
     - name: Show value of 'has_new_commits'
       run: echo ${{ steps.sync.outputs.has_new_commits }}
