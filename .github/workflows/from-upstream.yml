@@ -12,10 +12,9 @@ jobs:
     name: Sync main with upstream latest
     
     steps:
-    - name: Checkout master
+    - name: Checkout
       uses: actions/checkout@v4
       with:
-        persist-credentials: false
         fetch-depth: 0
     - name: Test
       run: echo $(git branch)
