@@ -9,8 +9,8 @@ on:
         type: string
   push:
     tags:
-      - '*'
-      - '!upm-*'
+    - '*'
+    - '!upm-*'
 
 jobs:
   sync-to-upm:
