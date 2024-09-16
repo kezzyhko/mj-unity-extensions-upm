@@ -23,7 +23,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         with:
-          upstream_repository: google-deepmind/mujoco
+          upstream_repository: Balint-H/modular-agents
           upstream_branch: main
           target_branch: main
           git_fetch_args: --tags
