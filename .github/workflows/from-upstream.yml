@@ -17,6 +17,8 @@ jobs:
       with:
         persist-credentials: false
         fetch-depth: 0
+    - name: Test
+      run: echo $(git tag)
     - name: Sync master with upstream latest
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
@@ -27,6 +29,8 @@ jobs:
         target_sync_branch: main
         upstream_pull_args: --tags
         target_branch_push_args: --tags
+    - name: Show value of 'has_new_commits'
+      run: echo ${{ steps.sync.outputs.has_new_commits }}
     - name: Create runs for new tags
       run: |
         UPM_TAGS="$(git tag --merged upm)"
@@ -39,5 +43,3 @@ jobs:
             RUN_ID=$(gh run list --json databaseId --workflow to-upm.yml --limit 1 | jq -r '.[0].databaseId') # https://stackoverflow.com/a/77825187/6702274
             gh run watch RUN_ID --exit-status
         done
-    - name: Show value of 'has_new_commits'
-      run: echo ${{ steps.sync.outputs.has_new_commits }}
