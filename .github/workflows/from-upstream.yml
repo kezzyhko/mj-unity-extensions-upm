@@ -27,7 +27,6 @@ jobs:
         target_sync_branch: main
         upstream_pull_args: --tags
         target_branch_push_args: --tags
-        shallow_since: 3 years ago
     - name: Push # needed to run subsequent workflows
       uses: ad-m/github-push-action@master
       with:
