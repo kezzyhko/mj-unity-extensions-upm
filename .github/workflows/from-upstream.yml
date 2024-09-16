@@ -45,7 +45,7 @@ jobs:
         do
           echo "===== $TAG"
           echo "Creating workflow"
-          gh workflow run to-upm.yml -f tagName=$TAG
+          gh workflow run to-upm.yml -f tag_name=$TAG
           echo "Workflow created, waiting..."
           RUN_ID=$(gh run list --json databaseId --workflow to-upm.yml --limit 1 | jq -r '.[0].databaseId') # https://stackoverflow.com/a/77825187/6702274
           gh run watch RUN_ID --exit-status
