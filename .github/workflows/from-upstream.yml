@@ -16,8 +16,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    - name: Test
-      run: echo $(git branch)
     - name: Sync master with upstream latest
       id: sync
       uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
@@ -29,13 +27,14 @@ jobs:
         upstream_pull_args: --tags
         target_branch_push_args: --tags
     - name: Show value of 'has_new_commits'
-      run: echo ${{ steps.sync.outputs.has_new_commits }}
+      run: |
+        echo ${{ steps.sync.outputs.has_new_commits }}
     - name: Create runs for new tags
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        UPM_TAGS="$(git tag --merged upm)"
-        MAIN_TAGS="$(git tag --merged main)"
+        UPM_TAGS="$(git tag --merged origin/upm)"
+        MAIN_TAGS="$(git tag --merged origin/main)"
         NEW_TAGS=$(grep -Fxvf <($UPM_TAGS) <(echo "$MAIN_TAGS"))
 
         echo "$NEW_TAGS" | while read TAG
