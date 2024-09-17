@@ -1,0 +1,57 @@
+name: UPM Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Tag to merge"
+        required: true
+        type: string
+
+jobs:
+  sync-to-upm:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set environment variables
+      run: |
+        ORIGINAL_TAG_NAME=${{ inputs.tag_name }}
+        echo "Converting tag '$ORIGINAL_TAG_NAME' to semver..."
+        [[ $ORIGINAL_TAG_NAME =~ ^([^0-9]*)([0-9]+)(\.[0-9]+)?(\.[0-9]+)?(-(.*))?$ ]] || exit 1
+        UPM_VERSION=${BASH_REMATCH[2]}${BASH_REMATCH[3]:-".0"}${BASH_REMATCH[4]:-".0"}${BASH_REMATCH[5]}
+        echo "Converted, got '$UPM_VERSION'"
+        echo "ORIGINAL_TAG_NAME=$ORIGINAL_TAG_NAME" >> $GITHUB_ENV
+        echo "UPM_VERSION=$UPM_VERSION" >> $GITHUB_ENV
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        ref: upm
+    - name: Setup user
+      uses: fregante/setup-git-user@v2
+    - name: Set version in package.json
+      uses: jaywcjlove/github-action-package@main
+      with:
+        path: ./mj-unity-extensions/package.json
+        version: ${{ env.UPM_VERSION }}
+    - name: Commit
+      run: |
+        git add .
+        git commit -m "Update version in package.json"
+    - name: Merge 1
+      continue-on-error: true
+      run: |
+        git merge --no-commit --no-ff ${{ env.ORIGINAL_TAG_NAME }}
+    - name: Merge 2
+      run: |
+        git reset -- .github
+        git commit --no-edit
+        git push
+        echo "MERGE_COMMIT_HASH=$(git rev-parse --verify HEAD)" >> $GITHUB_ENV
+    - name: Create release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: upm-${{ env.UPM_VERSION }}
+        release_name: UPM - ${{ env.UPM_VERSION }}
+        commitish: ${{ env.MERGE_COMMIT_HASH }}

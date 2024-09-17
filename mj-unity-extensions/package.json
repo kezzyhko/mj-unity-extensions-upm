@@ -1,10 +1,10 @@
 {
-  "name": "com.github.mj-unity-extensions",
+  "name": "io.github.balint-h.mj-unity-extensions",
   "displayName": "Mj Extensions",
   "version": "0.1.0",
   "unity": "2021.2",
   "description": "Scripts for interfacing with a Mujoco Scene",
   "dependencies": {
-    "org.mujoco": "2.3.1"
+    "org.mujoco.mujoco": "2.3.1"
   }
 }
